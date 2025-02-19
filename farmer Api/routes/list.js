@@ -26,7 +26,7 @@ console.log(uploadImage);
       price: req.body.price,
       market: req.body.market,
       location: req.body.location,
-      uId: user._id,
+      uId:user._id,
       imageUrl:uploadImage.secure_url,
       imageId:uploadImage.public_id
     });
@@ -51,7 +51,7 @@ router.get("/all-list", async (req, res) => {
     );
     console.log(user);
     
-    const data = await List.find({uId:user.id})
+    const data = await List.find()
     res.status(200).json({
       data: data,
     });
@@ -68,7 +68,7 @@ router.get('/listData/:id',async(req,res)=>{
 const user = await jwt.verify(req.headers.authorization.split(" ")[1],"jsonkey")
 console.log(user)
 
-const data = await List.findById({_id:req.params.id}).populate('location','city ')
+const data = await List.findById({_id:req.params.id})
 console.log(data);
 
 res.status(200).json({
@@ -86,34 +86,86 @@ res.status(500).json({
 // delete list 
 
 router.delete('/delete/:id',async(req,res)=>{
-  try{
+try{
 const user = await jwt.verify(req.headers.authorization.split(" ")[1],"jsonkey")
 console.log(user);
-
 const data = await List.find({_id:req.params.id})
 console.log(data[0]);
+
 if(data[0].uId != user._id){
-  return  res.status(500).json({
- error:"Invalid user...."
-})
+
+  return res.status(500).json({
+    error:"invalid user.."
+  })
 }
 await cloudinary.uploader.destroy(data[0].imageId)
-const deleteData = await List.findByIdAndDelete(req.params.id)
+await List.findByIdAndDelete(req.params.id)
 res.status(200).json({
-  deleteData :"deleteData"
+  deleteData:"dataDelete"
 })
 
-  }
-  catch(err){
+
+}
+catch(err){
 console.log(err);
 res.status(200).json({
   error:err
 })
 
-  }
+}
 })
 // list update
 router.put('/update/:id',async(req,res)=>{
-  
+  try{
+    const user =await jwt.verify(req.headers.authorization.split(" ")[1],"jsonkey")
+   const data = await List.find({_id:req.params.id})
+   if(data[0].uId != user._id){
+    return res.status(200).josn({
+      error:"invalid user.."
+    })
+   }
+   if(req.files){
+    await cloudinary.uploader.destroy(data[0].imageId)
+    const uploadPhoto = await cloudinary.uploader.upload(req.files.photo.tempFilePath)
+    const upDate ={
+      vegetableName: req.body.vegetableName,
+      quantity: req.body.quantity,
+      price: req.body.price,
+      market: req.body.market,
+      location: req.body.location,
+      uId:user._id,
+      imageUrl:uploadPhoto.secure_url,
+      imageId:uploadPhoto.public_id
+    }
+    const update = await List.findByIdAndUpdate(req.params.id,upDate,{new:true})
+    res.status(200).json({
+      upDate:update
+    })
+   }
+   else{
+    const upDate ={
+      vegetableName: req.body.vegetableName,
+      quantity: req.body.quantity,
+      price: req.body.price,
+      market: req.body.market,
+      location: req.body.location,
+      uId:user._id,
+      
+    }
+    const update = await List.findByIdAndUpdate(req.params.id,upDate,{new:true})
+
+    res.status(200).josn({
+      update:update
+    })
+   
+   }
+
+  }catch(err){
+console.log(err);
+res.status(500).json({
+  error:err
+})
+
+  }
 })
 module.exports = router;
