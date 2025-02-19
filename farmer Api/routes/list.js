@@ -37,7 +37,7 @@ console.log(uploadImage);
   } catch (err) {
     console.log(err);
     res.status(500).json({
-      error: err,
+      error: err
     });
   }
 });
@@ -51,7 +51,7 @@ router.get("/all-list", async (req, res) => {
     );
     console.log(user);
     
-    const data = await List.find()
+    const data = await List.find({uId:user.id})
     res.status(200).json({
       data: data,
     });
@@ -68,7 +68,7 @@ router.get('/listData/:id',async(req,res)=>{
 const user = await jwt.verify(req.headers.authorization.split(" ")[1],"jsonkey")
 console.log(user)
 
-const data = await List.find({_id:req.params.id}).populate('location','city ')
+const data = await List.findById({_id:req.params.id}).populate('location','city ')
 console.log(data);
 
 res.status(200).json({
@@ -85,5 +85,35 @@ res.status(500).json({
 })
 // delete list 
 
-router.delete('/delete')
+router.delete('/delete/:id',async(req,res)=>{
+  try{
+const user = await jwt.verify(req.headers.authorization.split(" ")[1],"jsonkey")
+console.log(user);
+
+const data = await List.find({_id:req.params.id})
+console.log(data[0]);
+if(data[0].uId != user._id){
+  return  res.status(500).json({
+ error:"Invalid user...."
+})
+}
+await cloudinary.uploader.destroy(data[0].imageId)
+const deleteData = await List.findByIdAndDelete(req.params.id)
+res.status(200).json({
+  deleteData :"deleteData"
+})
+
+  }
+  catch(err){
+console.log(err);
+res.status(200).json({
+  error:err
+})
+
+  }
+})
+// list update
+router.put('/update/:id',async(req,res)=>{
+  
+})
 module.exports = router;
