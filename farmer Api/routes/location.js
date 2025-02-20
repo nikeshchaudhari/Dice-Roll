@@ -1,37 +1,39 @@
 const express = require('express')
 const router = express.Router()
-const locationSchema = require('../Models/Location')
+const Location = require('../Models/Location')
 const jwt = require('jsonwebtoken')
-require('dotenv').config()
-router.post('/address',async(req,res)=>{
-    try{
-const user = await jwt.verify(req.headers.authorization.split(" ")[1], "jsonkey")
-console.log(user);
 
-const addData = await new List({
-    country:req.body.country,
-    city:req.body.city,
-    postcode:req.body.postcode
-})
-const data = await addData.save()
-res.status(200).json({
-    data:data
-})
-
-    }
-    catch(err){
-console.log(err);
-res.status(500).json({
-    error:err
-})
-
-    }
-})
+router.post("/add-location", async (req, res) => {
+  try {
+    const user = await jwt.verify(
+      req.headers.authorization.split(" ")[1],
+      "jsonkey"
+    );
+    console.log(user);
+    
+    const data = await new Location({
+      country:req.body.country,
+      city:req.body.city,
+      postcode:req.body.postcode
+    });
+    const dataUpload = await data.save();
+    res.status(200).json({
+      dataUpload: dataUpload,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      error: err
+    });
+  }
+});
 // 
-router.post('/get-location',async(req,res)=>{
+router.get('/get-location',async(req,res)=>{
     try{
 const user = await jwt.verify(req.headers.authorization.split(" ")[1],"jsonkey")
-const data = await locationSchema.find()
+console.log(user);
+
+const data = await Location.find()
 res.status(200).json({
     data:data
 })
@@ -46,15 +48,19 @@ res.status(500).json({
     }
 })
 //
-router.get('/get/:id',async(req,res)=>{
+router.put('/update/:id',async(req,res)=>{
     try{
 const user = await jwt.verify(req.headers.authorization.split(" ")[1],"jsonkey")
-
-const data = await locationSchema.findById({_id:req.params.id})
-console.log(data);
+const data =await Location.find({_id:req.params.id})
+const upDate = {
+    country:req.params.country,
+    city:req.params.city,
+    postcode:req.params.postcode
+}
+const update = await Location.findByIdAndUpdate(req.params.id,upDate,{new:true})
 res.status(200).json({
-    data:data[0]
-  })
+    update:update
+})
 
     }
     catch(err){
@@ -62,7 +68,6 @@ res.status(200).json({
         res.status(500).json({
             error:err
         })
-        
     }
 })
 
