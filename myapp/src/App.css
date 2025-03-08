@@ -1,0 +1,36 @@
+*{
+  margin: 0px;
+  padding: 0px;
+  box-sizing: border-box;
+}
+body{
+  background-color: #333;
+}
+.main-container{
+  display:flex;
+  justify-content: center;
+  align-items: center;
+  height:100vh
+}
+.center-container{
+  display: flex;
+  justify-content: center;
+  align-items: start;
+  padding: 20px;
+  /* background-color: #333; */
+  height: 100vh;
+  
+ 
+}
+.add-btn{
+  /* background-color: red; */
+  margin-left: 5px;
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 100%;
+}
+.input-box{
+  padding: 15px;
+  width: 500px;
+  border-radius: 10px;
+}
